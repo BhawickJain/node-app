@@ -5,10 +5,14 @@ services:
       dockerfile: Dockerfile
     # keep container running
     stdin_open: true
+    env_file:
+      - .env
+    environment:
+      - PORT=${PORT}
     ports:
-      - 3000:3000
+      - 3000:${PORT}
     volumes:
       - ./app:/app
-      # anonymous mount to prevent being overwritten
+      # anonymous volume to prevent being overwritten
       # when mounting ./app with no node_modules
       - /app/node_modules
