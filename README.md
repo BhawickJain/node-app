@@ -21,7 +21,7 @@ WORKDIR /app
 RUN npm install —no-cache
 ```
 
-```docker-compose
+```yaml
 services:
   node-app:
     build: .
@@ -36,6 +36,20 @@ services:
 From here `docker compose up --build` and jump inside to install all the packages with `docker compose exec node-app /bin/bash`. Since there is a bind mount, the `./app` wille develop. Ensure you create a named or anonymous volume mount for `app/node_modules` and delete it from your local `app/` folder. Also ensure you ignore all files not required.
 
 You can save yourself by simply clone this project and use the docker cli commands to jump right in and build out.
+
+`[?]` Why do you need to `COPY . ./` if you have a bind mount?  
+`>>>` The bind mount is only there to support the development process. and will not be used in production. 
+
+`[?]` Can you and why would you set the `./app:/app` bind as read only from container's end?  
+`>>>` Generally for security but will mean that you're using `npm` command in your local machine instead of within the docker container. Since everything is being managed from the container, it is a reasonable gamble to keep the volume mount for read write (`rw`). However if you do can to set it the following snippet shows you how.
+```yaml
+services:
+  node-app:
+    [...]
+      volumes:
+        # volume mount as read only
+        - ./app:/app:ro
+```
 
 ### References
 
