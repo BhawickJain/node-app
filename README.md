@@ -50,7 +50,54 @@ services:
         # volume mount as read only
         - ./app:/app:ro
 ```
+modified from [[doh-rovol](https://devopsheaven.com/docker/docker-compose/volumes/2018/01/16/volumes-in-docker-compose.html)]
+
+### Environment variables
+
+```Dockerfile
+[...]
+ENV PORT 3000
+[...]
+```
+
+This means that within our linux container, there is now an environment variable exported that can grabbed by our node-app:
+```bash
+printenv
+```
+
+Allows express to get the PORT number to listen on with:
+```javascript
+const port = process.env.port || 3000;
+```
+
+This is a standard practice for the Heroku Twelve Factor app development [[so-portenv](https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js)]. Technically, since this port is internal container  port number it should not matter too much, the port binding however is more important. In certain deployments where you can't have a port binding as such, this configuration is critical.
+
+It is generally better to have a `.env` file to keep all your environemtn variables separated.
+```env
+PORT=4000
+```
+Change the `docker-compile accordingly`
+```yaml
+services:
+  [...]
+  node-app:
+    [...]
+      env-file:
+        - .env
+      ports:
+        - 3000:${PORT}
+```
+It is the equivalent to `docker run --env-file=FILE -p 3000:4000...` in the docker cli.
+
+`[ ]` What is the docker compose equivalent of this?  
+
+`[?]` How can you access node.js REPL mode from your CLI?  
+`>>>` `docker compose exec node-app node`  
+
+You cannot scale a container if it has a custom `container_name` option in the `docker-compose.yaml` file [[dkr-docs-conname](https://docs.docker.com/compose/compose-file/compose-file-v3/#container_name)].
 
 ### References
 
 [[node-semver](https://nodejs.dev/learn/semantic-versioning-using-npm)] Semantic Versioning using NPM (Node JS Getting Started)  
+[[doh-rovol](https://devopsheaven.com/docker/docker-compose/volumes/2018/01/16/volumes-in-docker-compose.html)] Using read-only volumes in Docker Compose (DevOps Heaven)  
+[[so-portenv](https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js)] What is the `process.env.port`? (stackoverflow)  
